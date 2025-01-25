@@ -1,0 +1,12 @@
+Criar uma API para gastos pessoais
+
+- Criar estrutura do projeto
+- Planejar o sistema
+- Criar controle do usuário
+- Criar autenticação com JWT
+- Criar centro de custos
+- Todo centro de custos deve estar vinculado a um usuário
+- Criar os titulos
+- Todo o titulo deve ta vinculado a um usuário
+- Todo titulo deve tá vinculado a 1 ou N centro de custos
+- Criar endpoint de fluxo de caixa
