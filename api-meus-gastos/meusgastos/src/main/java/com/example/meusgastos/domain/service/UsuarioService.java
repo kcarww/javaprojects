@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.example.meusgastos.domain.exception.ResourceBadRequestException;
 import com.example.meusgastos.domain.exception.ResourceNotFoundException;
@@ -15,6 +16,7 @@ import com.example.meusgastos.domain.repository.UsuarioRepository;
 import com.example.meusgastos.dto.usuario.UsuarioRequestDto;
 import com.example.meusgastos.dto.usuario.UsuarioResponseDto;
 
+@Service
 public class UsuarioService implements ICRUDService<UsuarioRequestDto, UsuarioResponseDto>{
 
     @Autowired
@@ -36,7 +38,7 @@ public class UsuarioService implements ICRUDService<UsuarioRequestDto, UsuarioRe
     public UsuarioResponseDto obterPorId(Long id) {
         Optional<Usuario> usuario = usuarioRepository.findById(id);
 
-        if (usuario.isPresent()) {
+        if (!usuario.isPresent()) {
             throw new ResourceNotFoundException("Não foi possível encontrar o usuário com id: " + id);
         }
 
@@ -47,8 +49,14 @@ public class UsuarioService implements ICRUDService<UsuarioRequestDto, UsuarioRe
     public UsuarioResponseDto cadastrar(UsuarioRequestDto dto) {
         validarDados(dto);
 
-        Usuario usuario = mapper.map(dto, Usuario.class);
+        Optional<Usuario> usuarioExistente = usuarioRepository.findByEmail(dto.getEmail());
+        if (usuarioExistente.isPresent()) {
+            throw new ResourceBadRequestException("Já existe um usuário cadastrado com o email: " + dto.getEmail());
+        }
 
+        Usuario usuario = mapper.map(dto, Usuario.class);
+        
+        usuario.setDataCadastro(new Date());
         usuario = usuarioRepository.save(usuario);
 
         return mapper.map(usuario, UsuarioResponseDto.class);
@@ -63,6 +71,7 @@ public class UsuarioService implements ICRUDService<UsuarioRequestDto, UsuarioRe
         
         Usuario usuario = mapper.map(dto, Usuario.class);
         usuario.setId(id);
+        usuario.setDataCadastro(usuarioBanco.getDataCadastro());
         usuario.setDataInativacao(usuarioBanco.getDataInativacao());
         
         usuario = usuarioRepository.save(usuario);
@@ -71,10 +80,14 @@ public class UsuarioService implements ICRUDService<UsuarioRequestDto, UsuarioRe
 
     @Override
     public void deletar(Long id) {
-        UsuarioResponseDto usuarioEncontrado = obterPorId(id);
-        usuarioEncontrado.setDataInativacao(new Date());
+        Optional<Usuario> optUsuario = usuarioRepository.findById(id);
 
-        Usuario usuario = mapper.map(usuarioEncontrado, Usuario.class);
+        if(optUsuario.isEmpty()) {
+            throw new ResourceNotFoundException("Não foi possível encontrar o usuário com id: " + id);
+        }
+
+        Usuario usuario = optUsuario.get();
+        usuario.setDataInativacao(new Date());
         usuarioRepository.save(usuario);
     }
 
