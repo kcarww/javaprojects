@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.example.meusgastos.domain.exception.ResourceBadRequestException;
+import com.example.meusgastos.domain.exception.ResourceNotFoundException;
 import com.example.meusgastos.domain.model.Usuario;
 import com.example.meusgastos.domain.repository.UsuarioRepository;
 import com.example.meusgastos.dto.usuario.UsuarioRequestDto;
@@ -35,7 +37,7 @@ public class UsuarioService implements ICRUDService<UsuarioRequestDto, UsuarioRe
         Optional<Usuario> usuario = usuarioRepository.findById(id);
 
         if (usuario.isPresent()) {
-
+            throw new ResourceNotFoundException("Não foi possível encontrar o usuário com id: " + id);
         }
 
         return mapper.map(usuario.get(), UsuarioResponseDto.class);
@@ -43,17 +45,39 @@ public class UsuarioService implements ICRUDService<UsuarioRequestDto, UsuarioRe
 
     @Override
     public UsuarioResponseDto cadastrar(UsuarioRequestDto dto) {
-        throw new UnsupportedOperationException("Unimplemented method 'cadastrar'");
+        validarDados(dto);
+
+        Usuario usuario = mapper.map(dto, Usuario.class);
+
+        usuario = usuarioRepository.save(usuario);
+
+        return mapper.map(usuario, UsuarioResponseDto.class);
+
     }
 
     @Override
     public UsuarioResponseDto atualizar(Long id, UsuarioRequestDto dto) {
-        throw new UnsupportedOperationException("Unimplemented method 'atualizar'");
+        obterPorId(id);
+
+        validarDados(dto);
+
+        Usuario usuario = mapper.map(dto, Usuario.class);
+        usuario.setId(id);
+        usuario = usuarioRepository.save(usuario);
+        return mapper.map(usuario, UsuarioResponseDto.class);
     }
 
     @Override
     public void deletar(Long id) {
-        throw new UnsupportedOperationException("Unimplemented method 'deletar'");
+        obterPorId(id);
+
+        usuarioRepository.deleteById(id);
+    }
+
+    private void validarDados(UsuarioRequestDto dto) {
+        if (dto.getEmail() == null || dto.getSenha() == null) {
+            throw new ResourceBadRequestException("Email e senha são obrigatórios");
+        }
     }
     
 }
