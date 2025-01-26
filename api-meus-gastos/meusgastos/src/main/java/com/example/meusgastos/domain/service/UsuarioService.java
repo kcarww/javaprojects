@@ -1,6 +1,6 @@
 package com.example.meusgastos.domain.service;
 
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -57,21 +57,25 @@ public class UsuarioService implements ICRUDService<UsuarioRequestDto, UsuarioRe
 
     @Override
     public UsuarioResponseDto atualizar(Long id, UsuarioRequestDto dto) {
-        obterPorId(id);
-
+        UsuarioResponseDto usuarioBanco = obterPorId(id);
         validarDados(dto);
 
+        
         Usuario usuario = mapper.map(dto, Usuario.class);
         usuario.setId(id);
+        usuario.setDataInativacao(usuarioBanco.getDataInativacao());
+        
         usuario = usuarioRepository.save(usuario);
         return mapper.map(usuario, UsuarioResponseDto.class);
     }
 
     @Override
     public void deletar(Long id) {
-        obterPorId(id);
+        UsuarioResponseDto usuarioEncontrado = obterPorId(id);
+        usuarioEncontrado.setDataInativacao(new Date());
 
-        usuarioRepository.deleteById(id);
+        Usuario usuario = mapper.map(usuarioEncontrado, Usuario.class);
+        usuarioRepository.save(usuario);
     }
 
     private void validarDados(UsuarioRequestDto dto) {
