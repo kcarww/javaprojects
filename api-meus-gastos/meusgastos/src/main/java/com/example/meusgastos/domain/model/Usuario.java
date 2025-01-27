@@ -1,7 +1,11 @@
 package com.example.meusgastos.domain.model;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 // import org.springframework.security.core.GrantedAuthority;
 // import org.springframework.security.core.userdetails.UserDetails;
@@ -14,7 +18,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
 @Entity
-public class Usuario {
+public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -107,35 +111,35 @@ public class Usuario {
 
 
     //#region Região do framework
-    // @Override
-    // public Collection<? extends GrantedAuthority> getAuthorities() {
-    //     return null;
-    // }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
 
-    // @Override
-    // public String getPassword() {
-    //     return senha;
-    // }
+    @Override
+    public String getPassword() {
+        return senha;
+    }
 
-    // @Override
-    // public String getUsername() {
-    //     return email;
-    // }
+    @Override
+    public String getUsername() {
+        return email;
+    }
 
-    // @Override
-    // public boolean isAccountNonLocked() {
-    //     return true;
-    // }
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
-    // @Override
-    // public boolean isCredentialsNonExpired() {
-    //     return true;
-    // }
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
-    // @Override
-    // public boolean isEnabled() {
-    //     return true;
-    // }
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 
     //#endregion
 
